@@ -6,6 +6,8 @@ import * as lockBackend from './../../lock.main.mjs';
 import * as mintBackend from './../../mint.main.mjs';
 import { IBaseResult, ISignTxnsResult } from "@agoralabs-sh/algorand-provider";
 import algosdk from "algosdk";
+//@ts-ignore
+import CONTRACT from "arccjs";
 const algoStdLib = loadStdlib('ALGO');
 
 // algoStdLib.setProviderByName("TestNet");
@@ -25,7 +27,25 @@ const voiStdLib = loadStdlib('ALGO');
 // });
 
 const algodClient = new algosdk.Algodv2("", "https://testnet-api.algonode.cloud/", "");
+const algoIndexer = new algosdk.Indexer("", "https://testnet-idx.algonode.cloud/", "");
+
 const voidClient = new algosdk.Algodv2("", "https://testnet-api.voi.nodly.io", "");
+const voiIndexer = new algosdk.Indexer("", "https://testnet-idx.voi.nodly.io", "");
+
+const lockStuff = {
+    "name": "Lock",
+    "desc": "Locks stuff",
+    "method": [
+        {
+            "name": "UserAPI_bridgeToken",
+            "args": [{ "type": "uint64" }, { "type": "address" }],
+            "returns": { "type": "void" }
+        },
+    ],
+    "events": []
+}
+
+
 
 class WalletProvider {
     public address: string;
@@ -79,20 +99,20 @@ export default function Bridge() {
 
     async function onClickBridge() {
 
-        try {
-            // algoStdLib.setWalletFallback(
-            //     algoStdLib.walletFallback({
-            //         providerEnv: 'TestNet',
-            //         WalletConnect: MakeAlgoSignerConnect(new WalletProvider(account?.address || ''), "")
-            //     })
-            // );
-            algoStdLib.setWalletFallback(algoStdLib.walletFallback({
-                providerEnv: 'TestNet', MyAlgoConnect: MakeAlgoSignerConnect(new WalletProvider(account?.address || ''), 'TestNet')
-            }));
-            console.log("setWalletFallback")
-        } catch (error) {
-            console.error(error);
-        }
+        // try {
+        //     // algoStdLib.setWalletFallback(
+        //     //     algoStdLib.walletFallback({
+        //     //         providerEnv: 'TestNet',
+        //     //         WalletConnect: MakeAlgoSignerConnect(new WalletProvider(account?.address || ''), "")
+        //     //     })
+        //     // );
+        //     algoStdLib.setWalletFallback(algoStdLib.walletFallback({
+        //         providerEnv: 'TestNet', MyAlgoConnect: MakeAlgoSignerConnect(new WalletProvider(account?.address || ''), 'TestNet')
+        //     }));
+        //     console.log("setWalletFallback")
+        // } catch (error) {
+        //     console.error(error);
+        // }
 
         console.log(JSON.stringify(quantity));
 
@@ -105,8 +125,18 @@ export default function Bridge() {
         console.log(JSON.stringify(acc));
 
         const ctcLock = acc.contract(lockBackend, 568599939);
-        await ctcLock.a.UserAPI.bridgeToken(algoStdLib.parseCurrency(numberQuantity), destinationAddress);
+
+        const ci = new CONTRACT(
+            ctcLock, algodClient, algoIndexer, lockStuff, {
+            addr: account?.address
+        }
+        )
+
+        await ci.UserAPI_bridgeToken(algoStdLib.parseCurrency(numberQuantity), destinationAddress)
         setBridged(true);
+
+        // await ctcLock.a.UserAPI.bridgeToken(algoStdLib.parseCurrency(numberQuantity), destinationAddress);
+        // setBridged(true);
     }
 
     async function onClickClaim() {
