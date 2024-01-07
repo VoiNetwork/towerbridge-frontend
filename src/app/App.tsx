@@ -1,26 +1,19 @@
-import React from 'react';
-import logo from './logo.svg';
 import './App.css';
-import { ChakraProvider } from '@chakra-ui/react'
+import { Box, ChakraProvider } from '@chakra-ui/react'
+import { AbsoluteCenter } from '@chakra-ui/react'
+import Bridge from './bridge/bridge';
 
 function App() {
   return (
     <ChakraProvider>
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.tsx</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
+      <div className="App w-screen h-screen bg-black">
+        <div className='container mx-auto w-full h-full'>
+          <Box position='relative' h='full' w='full'>
+            <AbsoluteCenter bg='silver' h='50%' w='full' color='white' axis='both' className='rounded-lg'>
+              <Bridge />
+            </AbsoluteCenter>
+          </Box>
+        </div>
       </div>
     </ChakraProvider>
   );
